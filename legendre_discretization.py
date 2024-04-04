@@ -18,22 +18,23 @@ def get_legendre_recursion(n, domain):
     a = np.repeat(a, n)
     _temp = (r-l)/2
     b = (lambda x: _temp * x / np.sqrt(4 * x ** 2 - 1))(np.arange(1, n))
+    # b is already square rooted
     return a, b
 
 def get_freqs(n, domain):
     alpha, beta = get_legendre_recursion(n, domain)
     M = np.diag(alpha) + np.diag(beta, -1) + np.diag(beta, 1)
-    freqs, eig_vec = np.linalg.eigh(M)
-    return freqs, eig_vec
+    freqs, eig_vecs = np.linalg.eigh(M)
+    weights = (eig_vecs[0, :]) ** 2 * (domain[1] - domain[0])
+    return freqs, weights
 
-def get_coups_sq(j, freqs, eig_ves, domain):
-    W = (eig_ves[0, :]) ** 2 * (domain[1] - domain[0])
-    V_squared = j(freqs) * W
+def get_coups_sq(j, freqs, weights):
+    V_squared = j(freqs) * weights
     return V_squared
 
 def get_vn_squared(j, n: int, domain):
-    freqs, eig_vecs = get_freqs(n, domain)
-    V_squared = get_coups_sq(j, freqs, eig_vecs, domain)
+    freqs, weights = get_freqs(n, domain)
+    V_squared = get_coups_sq(j, freqs, weights)
     return freqs, V_squared
 
 
